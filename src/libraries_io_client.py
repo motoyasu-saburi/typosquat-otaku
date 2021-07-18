@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from pip._vendor import requests
 
+import logging
 
 @dataclass
 class LibrariesIoSearchResult:
@@ -15,12 +16,13 @@ class LibrariesIoSearchResult:
     latest_release_published_at: str  # Datetime, "2021-05-24 14:25:05 UTC",
     latest_stable_release_number: str  # "1.4.1
     license_normalized: bool
-    latest_stable_release_published_at: str # Datetime, "2021-05-24 14:25:05 UTC",
-    licenses: Optional[str] # MIT
+    latest_stable_release_published_at: str  # Datetime, "2021-05-24 14:25:05 UTC",
+    licenses: Optional[str]  # MIT
     name: str  # grunt
     package_manager_url: str  # "https://www.npmjs.com/package/grunt"
     latest_download_url: str  # "https://registry.npmjs.org/grunt/-/grunt-1.4.1.tgz",
     repository_url: str  # "https://github.com/gruntjs/grunt"
+
 
 def _mapping_libraries_io_search_result(json: any) -> List[LibrariesIoSearchResult]:
     return list(map(lambda j: LibrariesIoSearchResult(
@@ -40,16 +42,15 @@ def _mapping_libraries_io_search_result(json: any) -> List[LibrariesIoSearchResu
         repository_url=j['repository_url']
     ), json))
 
+
 @dataclass
 class LibrariesIoClient:
     API_KEY = os.getenv("LIBRARIES_IO_API_KEY")
 
     def search_package(self, keyword: str) -> List[LibrariesIoSearchResult]:
-        SEARCH_API_URL = f"""https://libraries.io/api/search?q=${keyword}&api_key=${self.API_KEY}"""
+        SEARCH_API_URL = f"https://libraries.io/api/search?q=${keyword}&api_key=${self.API_KEY}"
         try:
             res = requests.get(SEARCH_API_URL)
             return _mapping_libraries_io_search_result(res.json())
         except Exception as e:
-            print(e)
-
-
+            logging.error(e)
