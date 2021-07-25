@@ -48,7 +48,7 @@ class LibrariesIoClient:
     API_KEY = os.getenv("LIBRARIES_IO_API_KEY")
 
     def search_package(self, keyword: str) -> List[LibrariesIoSearchResult]:
-        SEARCH_API_URL = f"https://libraries.io/api/search?q=${keyword}&api_key=${self.API_KEY}"
+        SEARCH_API_URL = f"https://libraries.io/api/search?q={keyword}&api_key={self.API_KEY}&sort=latest_release_published_at"
         try:
             res = requests.get(SEARCH_API_URL)
             return _mapping_libraries_io_search_result(res.json())

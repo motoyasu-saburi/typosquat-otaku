@@ -8,6 +8,7 @@ import httpretty
 
 class TestPackageDownloader(TestCase):
 
+    # TODO download binary(tgz) test
     @httpretty.activate(verbose=True, allow_net_connect=False)
     def test_download_library(self):
         PACKAGE_URL: Final[str] = "http://localhost:11115/package/example-0.0.1.tgz"
@@ -30,7 +31,7 @@ class TestPackageDownloader(TestCase):
                 forks=100,
                 stars=200,
                 language="PHP",
-                platform="",#TODO
+                platform="",  # TODO
                 latest_release_published_at="2021-05-24 14:25:05 UTC",
                 latest_stable_release_number="0.0.1",
                 license_normalized=False,

